@@ -1,0 +1,8 @@
+{
+  "name": "Documa — Intelligence, Extracted",
+  "description": "Enterprise-grade document intelligence platform for structured data extraction, semantic search, and conversational AI with citations.",
+  "requestFramePermissions": [
+    "camera",
+    "microphone"
+  ]
+}
