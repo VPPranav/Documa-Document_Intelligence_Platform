@@ -14,11 +14,22 @@ interface MulterRequest extends Request {
 }
 
 const upload = multer({ storage: multer.memoryStorage() });
+// Graceful fallback if env vars are missing so the server doesn't crash on start
+const supabaseUrl = process.env.VITE_SUPABASE_URL || "https://placeholder.supabase.co";
+const supabaseKey = process.env.VITE_SUPABASE_PUBLISHABLE_KEY || "placeholder-key";
 
-// Use the publishable key — RLS is disabled in the migration so this is fine
-const supabaseUrl = process.env.VITE_SUPABASE_URL!;
-const supabaseKey = process.env.VITE_SUPABASE_PUBLISHABLE_KEY!;
+if (!process.env.VITE_SUPABASE_URL) {
+  console.warn("WARNING: VITE_SUPABASE_URL is not set in the environment variables!");
+}
+
 const supabase = createClient(supabaseUrl, supabaseKey);
+
+// Disable Vercel's default body parser so Multer can consume the raw stream
+export const config = {
+  api: {
+    bodyParser: false,
+  },
+};
 
 const app = express();
 
@@ -240,6 +251,10 @@ app.get("/api/stats", async (req, res) => {
 });
 
 // ── Global error handler ─────────────────────────────────────────────────────
+
+app.get("/api/health", (req, res) => {
+  res.json({ status: "ok", supabaseConfigured: !!process.env.VITE_SUPABASE_URL });
+});
 
 app.use((err: any, req: any, res: any, next: any) => {
   console.error("GLOBAL ERROR:", err);
