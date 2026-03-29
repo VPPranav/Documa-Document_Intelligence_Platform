@@ -2,7 +2,9 @@ import express from "express";
 import multer from "multer";
 import mammoth from "mammoth";
 import cors from "cors";
-import { PDFParse } from "pdf-parse";
+// Use internal path to avoid pdf-parse loading test files via `fs` at import
+// time, which crashes Vercel serverless functions.
+import pdfParse from "pdf-parse/lib/pdf-parse.js";
 import { Request } from "express";
 import { createClient } from "@supabase/supabase-js";
 import dotenv from "dotenv";
@@ -52,10 +54,8 @@ app.post("/api/upload", upload.single("file"), async (req: MulterRequest, res) =
 
     try {
       if (mimeType === "application/pdf") {
-        const parser = new PDFParse({ data: req.file.buffer });
-        const result = await parser.getText();
+        const result = await pdfParse(req.file.buffer);
         text = result.text;
-        await parser.destroy();
       } else if (
         mimeType ===
         "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
