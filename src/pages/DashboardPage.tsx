@@ -681,6 +681,13 @@ export default function DashboardPage() {
         </div>
       </div>
 
+      <div className="mb-6 px-4 py-2 flex items-center gap-3 text-base text-gray-600 dark:text-gray-300">
+        <Clock className="w-5 h-5 text-indigo-500 dark:text-indigo-400" />
+        <p className="leading-relaxed">
+          Please note: It may take a few moments for your complete document history to synchronize and load.
+        </p>
+      </div>
+
       {/* Stats Cards */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-5 mb-10">
         {[
@@ -708,7 +715,6 @@ export default function DashboardPage() {
           </motion.div>
         ))}
       </div>
-
 
       {/* Pinned Documents */}
       {pinnedIds.length > 0 && (
