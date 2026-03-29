@@ -1,0 +1,32 @@
+-- ─────────────────────────────────────────────────────────────────────────────
+-- Documa — Supabase schema
+-- Paste this into your Supabase project → SQL Editor → Run
+-- ─────────────────────────────────────────────────────────────────────────────
+
+-- Documents table
+create table if not exists public.documents (
+  id          uuid primary key default gen_random_uuid(),
+  user_id     text not null,
+  name        text not null,
+  text        text,
+  mime_type   text,
+  status      text default 'processed',
+  created_at  timestamptz default now()
+);
+
+create index if not exists documents_user_id_idx on public.documents (user_id);
+
+-- Chat history table (one row per user, upserted on save)
+create table if not exists public.chat_history (
+  user_id    text primary key,
+  messages   jsonb default '[]'::jsonb,
+  updated_at timestamptz default now()
+);
+
+-- ─────────────────────────────────────────────────────────────────────────────
+-- Disable RLS so the publishable/anon key can read & write freely.
+-- This is fine for a personal/demo project. Enable RLS + policies later
+-- if you need per-user row security.
+-- ─────────────────────────────────────────────────────────────────────────────
+alter table public.documents  disable row level security;
+alter table public.chat_history disable row level security;
