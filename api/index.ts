@@ -2,9 +2,6 @@ import express from "express";
 import multer from "multer";
 import mammoth from "mammoth";
 import cors from "cors";
-// @ts-ignore - internal path avoids pdf-parse reading test files from disk at
-// import time, which crashes Vercel serverless functions.
-import pdfParse from "pdf-parse/lib/pdf-parse.js";
 import { Request } from "express";
 import { createClient } from "@supabase/supabase-js";
 import dotenv from "dotenv";
@@ -16,7 +13,7 @@ interface MulterRequest extends Request {
 }
 
 const upload = multer({ storage: multer.memoryStorage() });
-// Graceful fallback if env vars are missing so the server doesn't crash on start
+
 const supabaseUrl = process.env.VITE_SUPABASE_URL || "https://placeholder.supabase.co";
 const supabaseKey = process.env.VITE_SUPABASE_PUBLISHABLE_KEY || "placeholder-key";
 
@@ -25,13 +22,6 @@ if (!process.env.VITE_SUPABASE_URL) {
 }
 
 const supabase = createClient(supabaseUrl, supabaseKey);
-
-// Disable Vercel's default body parser so Multer can consume the raw stream
-export const config = {
-  api: {
-    bodyParser: false,
-  },
-};
 
 const app = express();
 
@@ -54,8 +44,14 @@ app.post("/api/upload", upload.single("file"), async (req: MulterRequest, res) =
 
     try {
       if (mimeType === "application/pdf") {
-        const result = await pdfParse(req.file.buffer);
+        // Dynamic import prevents pdf-parse + pdfjs-dist from loading at module
+        // startup time. On Vercel serverless, top-level pdfjs-dist import crashes
+        // because its worker file path cannot be resolved in the bundled environment.
+        const { PDFParse } = await import("pdf-parse");
+        const parser = new PDFParse({ data: new Uint8Array(req.file.buffer) });
+        const result = await parser.getText();
         text = result.text;
+        await parser.destroy();
       } else if (
         mimeType ===
         "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
@@ -89,7 +85,6 @@ app.post("/api/upload", upload.single("file"), async (req: MulterRequest, res) =
       return res.status(500).json({ error: "Failed to save document" });
     }
 
-    // Return camelCase shape the frontend expects
     res.json({
       id: doc.id,
       userId: doc.user_id,
@@ -195,7 +190,8 @@ app.post("/api/chat", async (req, res) => {
   res.json({ success: true });
 });
 
-// ── Get entities for a document (computed client-side, but available via API) ──
+// ── Get entities for a document ──────────────────────────────────────────────
+
 app.get("/api/documents/:id/entities", async (req, res) => {
   const userId = req.headers["x-user-id"] as string;
   if (!userId) return res.status(401).json({ error: "Unauthorized" });
@@ -212,11 +208,11 @@ app.get("/api/documents/:id/entities", async (req, res) => {
     return res.status(404).json({ error: "Document not found" });
   }
 
-  // Return the raw text so the client can run NER
   res.json({ id: data.id, name: data.name, text: data.text, mimeType: data.mime_type });
 });
 
 // ── Document stats ───────────────────────────────────────────────────────────
+
 app.get("/api/stats", async (req, res) => {
   const userId = req.headers["x-user-id"] as string;
   if (!userId) return res.status(401).json({ error: "Unauthorized" });
@@ -250,11 +246,13 @@ app.get("/api/stats", async (req, res) => {
   res.json(stats);
 });
 
-// ── Global error handler ─────────────────────────────────────────────────────
+// ── Health check ─────────────────────────────────────────────────────────────
 
 app.get("/api/health", (req, res) => {
   res.json({ status: "ok", supabaseConfigured: !!process.env.VITE_SUPABASE_URL });
 });
+
+// ── Global error handler ─────────────────────────────────────────────────────
 
 app.use((err: any, req: any, res: any, next: any) => {
   console.error("GLOBAL ERROR:", err);
