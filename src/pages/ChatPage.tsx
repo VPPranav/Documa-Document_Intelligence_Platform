@@ -76,6 +76,7 @@ export default function ChatPage() {
   const [input, setInput] = useState("");
   const [isTyping, setIsTyping] = useState(false);
   const [documents, setDocuments] = useState<Document[]>([]);
+  const [isLoadingDocuments, setIsLoadingDocuments] = useState(true);
   const [selectedDocId, setSelectedDocId] = useState<string>("");
   const [docSearch, setDocSearch] = useState("");
   const [showSessions, setShowSessions] = useState(false);
@@ -93,7 +94,11 @@ export default function ChatPage() {
   }, [messages, isTyping]);
 
   const fetchDocuments = async () => {
-    if (!user.id) return;
+    if (!user.id) {
+      setIsLoadingDocuments(false);
+      return;
+    }
+    setIsLoadingDocuments(true);
     try {
       const response = await fetch("/api/documents", { headers: { "x-user-id": user.id } });
       const data = await response.json();
@@ -109,6 +114,8 @@ export default function ChatPage() {
     } catch (error) {
       console.error("Fetch error:", error);
       toast.error("Failed to load documents");
+    } finally {
+      setIsLoadingDocuments(false);
     }
   };
 
@@ -378,10 +385,12 @@ Provide a clear, grounded answer with citations. Format using markdown where hel
                 );
               })}
               {filteredDocs.length === 0 && (
-                <div className="text-center py-10 text-gray-400 dark:text-gray-500 text-xs">
-                  {documents.length === 0
-                    ? "No documents yet. Upload one in the Dashboard."
-                    : "No documents match your search."}
+                <div className="text-center py-10 text-gray-400 dark:text-gray-500 text-xs px-2">
+                  {isLoadingDocuments
+                    ? "The documents are loading.. Please wait till the documents are loaded"
+                    : documents.length === 0
+                      ? "No documents yet. Upload one in the Dashboard."
+                      : "No documents match your search."}
                 </div>
               )}
             </div>
