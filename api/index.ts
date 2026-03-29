@@ -2,6 +2,8 @@ import express from "express";
 import multer from "multer";
 import mammoth from "mammoth";
 import cors from "cors";
+// @ts-ignore - internal path avoids pdf-parse reading test files from disk at
+// import time, which crashes Vercel serverless functions.
 import pdfParse from "pdf-parse/lib/pdf-parse.js";
 import { Request } from "express";
 import { createClient } from "@supabase/supabase-js";
