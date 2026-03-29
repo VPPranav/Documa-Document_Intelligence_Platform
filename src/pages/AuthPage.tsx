@@ -5,7 +5,7 @@ import { Mail, Lock, User as UserIcon, ArrowRight, ShieldCheck } from "lucide-re
 import { toast } from "sonner";
 import { createClient } from "@supabase/supabase-js";
 
-// Initialise Supabase with the two keys from .env.local
+// Initialise Supabase with the two keys from .env
 const supabase = createClient(
   import.meta.env.VITE_SUPABASE_URL as string,
   import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY as string

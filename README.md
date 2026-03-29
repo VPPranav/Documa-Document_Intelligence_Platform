@@ -125,7 +125,7 @@ documa_webapp/
 ├── server.ts                # Express API server + file parsing
 ├── database.json            # Local JSON persistence
 ├── .env.example             # Example environment variables
-├── .env.local               # Local environment secrets (Supabase keys, Auth, etc)
+├── .env                     # Environment secrets (Supabase keys, Auth, etc)
 ├── vite.config.ts
 ├── tailwind.config.ts
 └── package.json
@@ -158,11 +158,11 @@ documa_webapp/
 
    Make a copy of the example environment file:
    ```bash
-   cp .env.example .env.local
+   cp .env.example .env
    ```
-   *Note: If you're on Windows, you can manually duplicate the file and rename it to `.env.local`.*
+   *Note: If you're on Windows, you can manually duplicate the file and rename it to `.env`.*
 
-   Open `.env.local` and configure your credentials:
+   Open `.env` and configure your credentials:
    - **Supabase Keys:** Provide `VITE_SUPABASE_URL` and `VITE_SUPABASE_PUBLISHABLE_KEY` (Get these from your project dashboard on Supabase).
    - **Gemini API Key:** Optionally set `GEMINI_API_KEY` here. Alternatively, you can supply it securely via the in-app **Settings → API Configuration** page.
 
@@ -213,7 +213,7 @@ All endpoints strictly require the `x-user-id` header (injected automatically by
 ## 🔐 Security & Authenication Notes
 
 Documa uses **Supabase Authentication** exclusively for secure user login and identity management.
-Before running the project locally, you must create a free [Supabase](https://supabase.com/) project, and drop your project URL and Anon key into your `.env.local` file. This ensures enterprise-grade isolation between accounts, protecting document endpoints.
+Before running the project, you must create a free [Supabase](https://supabase.com/) project, and drop your project URL and Anon key into your `.env` file. This ensures enterprise-grade isolation between accounts, protecting document endpoints.
 
 ---
 

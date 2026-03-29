@@ -9,7 +9,7 @@ import { Request } from "express";
 import { createClient } from "@supabase/supabase-js";
 import dotenv from "dotenv";
 
-dotenv.config({ path: ".env.local" });
+dotenv.config({ path: ".env" });
 
 interface MulterRequest extends Request {
   file?: any;
