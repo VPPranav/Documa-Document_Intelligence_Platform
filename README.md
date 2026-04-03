@@ -123,8 +123,6 @@ documa_webapp/
 │   ├── App.tsx                  # Root router and layout
 │   └── main.tsx                 # Entry point
 ├── server.ts                # Express API server + file parsing
-├── database.json            # Local JSON persistence
-├── .env.example             # Example environment variables
 ├── .env                     # Environment secrets (Supabase keys, Auth, etc)
 ├── vite.config.ts
 ├── tailwind.config.ts
